@@ -5,11 +5,13 @@ struct Timer {
     current_page: Pages,
     hour_input: u8,
     minute_input: u16,
-    second_input: u16, // in seconds
+    second_input: u16,
 
     hour_str_input: String,
     minute_str_input: String,
-    second_str_input: String
+    second_str_input: String,
+
+    current_time: u32
 
 }
 
@@ -44,7 +46,8 @@ impl Sandbox for Timer {
             second_input: 0,
             hour_str_input: String::from(""),
             minute_str_input: String::from(""),
-            second_str_input: String::from("")
+            second_str_input: String::from(""),
+            current_time: 0
         }
     }
 
@@ -65,14 +68,17 @@ impl Sandbox for Timer {
             Messages::HourInput => {
                 let hour: u8 = self.hour_str_input.parse().unwrap();
                 self.hour_input = hour;
+                self.current_time += (hour as u32 * 60) * 60;
             }
             Messages::MinuteInput => {
                 let minute: u16 = self.minute_str_input.parse().unwrap();
                 self.minute_input = minute;
+                self.current_time += minute as u32 * 60;
             }
             Messages::SecondInput => {
                 let second: u16 = self.second_str_input.parse().unwrap();
-                self.second_input = second
+                self.second_input = second;
+                self.current_time += second as u32;
             }
         }
     }
@@ -102,7 +108,14 @@ impl Sandbox for Timer {
 
             
             }
-            Pages::TimerLive => {text("Timer live").into()}
+            Pages::TimerLive => {
+
+                let time_display = text(format!("time in seconds: {}", &self.current_time));
+                time_display.into()
+
+
+
+            }
             Pages::TimerFinished => {text("timer finished").into()}
         }
     }
