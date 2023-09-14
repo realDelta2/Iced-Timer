@@ -1,8 +1,11 @@
-use iced::{Sandbox, Settings, widget::text};
+use iced::{Sandbox, Settings};
+use iced::widget::{text, Container, Row, TextInput}
 
 struct Timer {
     current_page: Pages,
-    entered_time: i32, // in seconds
+    hour_input: u8,
+    minute_input: u16,
+    second_input: u16, // in seconds
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -23,7 +26,9 @@ impl Sandbox for Timer {
     fn new() -> Self {
         Timer {
             current_page: Pages::TimerSelecting,
-            entered_time: 0
+            hour_input: 0,
+            minute_input: 0,
+            second_input: 0
         }
     }
 
@@ -35,7 +40,17 @@ impl Sandbox for Timer {
     }
 
     fn view(&self) -> iced::Element<'_, Self::Message> {
-       text("here is just a test").into()
+        match &self.current_page {
+            Pages::TimerSelecting => {
+
+
+
+
+
+            }
+            Pages::TimerLive => {text("Timer live")}
+            Pages::TimerFinished => {text("timer finished")}
+        }.into()
     }
 }
 
