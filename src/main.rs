@@ -1,4 +1,4 @@
-use iced::{Sandbox, Settings};
+use iced::{Application, Settings, Theme, executor, Command};
 use iced::widget::{text, Container, Row, TextInput, Button, Column};
 
 struct Timer {
@@ -35,11 +35,15 @@ enum Messages {
     SecondInput,
 }
 
-impl Sandbox for Timer {
+impl Application for Timer {
     type Message = Messages;
+    type Theme = Theme;
+    type Executor = executor::Default;
+    type Flags = ();
 
-    fn new() -> Self {
-        Timer {
+
+    fn new(_flags: ()) -> (Timer, Command<Messages>) {
+        (Timer {
             current_page: Pages::TimerSelecting,
             hour_input: 0,
             minute_input: 0,
@@ -48,14 +52,14 @@ impl Sandbox for Timer {
             minute_str_input: String::from(""),
             second_str_input: String::from(""),
             current_time: 0
-        }
+        }, Command::none())
     }
 
     fn title(&self) -> String {
         String::from("boiler plate")
     }
 
-    fn update(&mut self, message: Self::Message) {
+    fn update(&mut self, message: Self::Message) -> Command<Messages> {
         match message {
             Messages::ChangePage(page) => {
                 self.current_page = page
@@ -81,6 +85,7 @@ impl Sandbox for Timer {
                 self.current_time += second as u32;
             }
         }
+        Command::none()
     }
 
     fn view(&self) -> iced::Element<'_, Self::Message> {
