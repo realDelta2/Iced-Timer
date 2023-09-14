@@ -530,21 +530,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "fontconfig-parser"
-version = "0.5.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "674e258f4b5d2dcd63888c01c68413c51f565e8af99d2f7701c7b81d79ef41c4"
-dependencies = [
- "roxmltree",
-]
-
-[[package]]
 name = "fontdb"
 version = "0.14.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "af8d8cbea8f21307d7e84bca254772981296f058a1d36b461bf4d83a7499fc9e"
 dependencies = [
- "fontconfig-parser",
  "log",
  "memmap2 0.6.2",
  "slotmap",
@@ -850,7 +840,6 @@ dependencies = [
 name = "iced-timer-app"
 version = "0.1.0"
 dependencies = [
- "fontdb",
  "iced",
 ]
 
@@ -1786,15 +1775,6 @@ name = "renderdoc-sys"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "216080ab382b992234dda86873c18d4c48358f5cfcb70fd693d7f6f2131b628b"
-
-[[package]]
-name = "roxmltree"
-version = "0.18.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d8f595a457b6b8c6cda66a48503e92ee8d19342f905948f29c383200ec9eb1d8"
-dependencies = [
- "xmlparser",
-]
 
 [[package]]
 name = "rustc-demangle"
@@ -2846,12 +2826,6 @@ name = "xml-rs"
 version = "0.8.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bab77e97b50aee93da431f2cee7cd0f43b4d1da3c408042f2d7d164187774f0a"
-
-[[package]]
-name = "xmlparser"
-version = "0.13.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4d25c75bf9ea12c4040a97f829154768bbbce366287e2dc044af160cd79a13fd"
 
 [[package]]
 name = "yazi"

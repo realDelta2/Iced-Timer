@@ -1,19 +1,24 @@
 use iced::{Sandbox, Settings};
-v
+
+use main_page::selector;
+mod main_page;
+
+
+
 struct Timer {
     current_page: Pages,
     entered_time: i32 // in seconds
 }
 
-#[derive(Debug)]
-enum Pages {
+#[derive(Debug, Clone, Copy)]
+pub enum Pages {
     TimerSelecting,
     TimerFinished,
     TimerLive
 }
 
-#[derive(Debug)]
-enum Messages {
+#[derive(Debug, Clone, Copy)]
+pub enum Messages {
     ChangePage(Pages)
 }
 
