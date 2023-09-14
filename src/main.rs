@@ -1,13 +1,14 @@
 use iced::{Sandbox, Settings};
 
-use main_page::selector;
-mod main_page;
+use pages::{Selector, TimerLive};
+mod pages;
 
 
 
 struct Timer {
     current_page: Pages,
-    entered_time: i32 // in seconds
+    entered_time: i32, // in seconds
+    timer_pages: (Selector, TimerLive)
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -28,7 +29,8 @@ impl Sandbox for Timer {
     fn new() -> Self {
         Timer {
             current_page: Pages::TimerSelecting,
-            entered_time: 0
+            entered_time: 0,
+            timer_pages: (Selector::new(), TimerLive::new())
         }
     }
 
@@ -43,7 +45,7 @@ impl Sandbox for Timer {
     }
 
     fn view(&self) -> iced::Element<'_, Self::Message> {
-        todo!()
+        self.timer_pages.1.view()
     }
 }
 
