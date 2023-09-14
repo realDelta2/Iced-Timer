@@ -24,9 +24,13 @@ enum Pages {
 enum Messages {
     ChangePage(Pages),
 
-    HourInput(String),
-    MinuteInput(String),
-    SecondInput(String)
+    HourStrInput(String),
+    MinuteStrInput(String),
+    SecondStrInput(String),
+
+    HourInput,
+    MinuteInput,
+    SecondInput,
 }
 
 impl Sandbox for Timer {
@@ -51,9 +55,23 @@ impl Sandbox for Timer {
     fn update(&mut self, message: Self::Message) {
         match message {
             Messages::ChangePage(page) => {}
-            Messages::HourInput(input) => {self.hour_str_input = input}
-            Messages::MinuteInput(input) => {self.minute_str_input = input}
-            Messages::SecondInput(input) => {self.second_str_input = input}
+
+            Messages::HourStrInput(input) => {self.hour_str_input = input}
+            Messages::MinuteStrInput(input) => {self.minute_str_input = input}
+            Messages::SecondStrInput(input) => {self.second_str_input = input}
+
+            Messages::HourInput => {
+                let hour: u8 = self.hour_str_input.parse().unwrap();
+                self.hour_input = hour;
+            }
+            Messages::MinuteInput => {
+                let minute: u16 = self.minute_str_input.parse().unwrap();
+                self.minute_input = minute;
+            }
+            Messages::SecondInput => {
+                let second: u16 = self.second_str_input.parse().unwrap();
+                self.second_input = second
+            }
         }
     }
 
@@ -61,20 +79,22 @@ impl Sandbox for Timer {
         match &self.current_page {
             Pages::TimerSelecting => {
             let hour_selector = TextInput::new("0", &self.hour_str_input)
-            .on_input(|input| {Messages::HourInput(input)});
+            .on_input(|input| {Messages::HourStrInput(input)})
+            .on_submit(Messages::HourInput);
 
 
             let minute_selector = TextInput::new("0", &self.minute_str_input)
-            .on_input(|input| {Messages::MinuteInput(input)});
+            .on_input(|input| {Messages::MinuteStrInput(input)})
+            .on_submit(Messages::MinuteInput);
 
 
             let second_selector = TextInput::new("0", &self.second_str_input)
-            .on_input(|input| {Messages::SecondInput(input)});
+            .on_input(|input| {Messages::SecondStrInput(input)})
+            .on_submit(Messages::SecondInput);
 
             Row::new().push(hour_selector).push(minute_selector).push(second_selector).into()
 
-
-
+            
             }
             Pages::TimerLive => {text("Timer live").into()}
             Pages::TimerFinished => {text("timer finished").into()}
