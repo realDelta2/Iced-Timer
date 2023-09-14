@@ -1,5 +1,5 @@
 use iced::{Sandbox, Settings};
-use iced::widget::{text, Container, Row, TextInput};
+use iced::widget::{text, Container, Row, TextInput, Button, Column};
 
 struct Timer {
     current_page: Pages,
@@ -54,7 +54,9 @@ impl Sandbox for Timer {
 
     fn update(&mut self, message: Self::Message) {
         match message {
-            Messages::ChangePage(page) => {}
+            Messages::ChangePage(page) => {
+                self.current_page = page
+            }
 
             Messages::HourStrInput(input) => {self.hour_str_input = input}
             Messages::MinuteStrInput(input) => {self.minute_str_input = input}
@@ -92,7 +94,11 @@ impl Sandbox for Timer {
             .on_input(|input| {Messages::SecondStrInput(input)})
             .on_submit(Messages::SecondInput);
 
-            Row::new().push(hour_selector).push(minute_selector).push(second_selector).into()
+            let time_enter = Button::new("finalize time!").on_press(Messages::ChangePage(Pages::TimerLive));
+
+            let input_row = Row::new().push(hour_selector).push(minute_selector).push(second_selector);
+            
+            Column::new().push(input_row).push(time_enter).into()
 
             
             }
