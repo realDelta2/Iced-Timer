@@ -1,25 +1,19 @@
-use iced::{Sandbox, Settings};
-
-use pages::{Selector, TimerLive};
-mod pages;
-
-
+use iced::{Sandbox, Settings, widget::text};
 
 struct Timer {
     current_page: Pages,
     entered_time: i32, // in seconds
-    timer_pages: (Selector, TimerLive)
 }
 
 #[derive(Debug, Clone, Copy)]
-pub enum Pages {
+enum Pages {
     TimerSelecting,
     TimerFinished,
     TimerLive
 }
 
 #[derive(Debug, Clone, Copy)]
-pub enum Messages {
+enum Messages {
     ChangePage(Pages)
 }
 
@@ -29,8 +23,7 @@ impl Sandbox for Timer {
     fn new() -> Self {
         Timer {
             current_page: Pages::TimerSelecting,
-            entered_time: 0,
-            timer_pages: (Selector::new(), TimerLive::new())
+            entered_time: 0
         }
     }
 
@@ -39,13 +32,10 @@ impl Sandbox for Timer {
     }
 
     fn update(&mut self, message: Self::Message) {
-        match message {
-            Messages::ChangePage(chosen_page) => self.current_page = chosen_page
-        }
     }
 
     fn view(&self) -> iced::Element<'_, Self::Message> {
-        self.timer_pages.1.view()
+       text("here is just a test").into()
     }
 }
 
