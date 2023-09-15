@@ -15,7 +15,10 @@ struct Timer {
     second_str_input: String,
 
     current_time: u32,
-    ticking_down: bool
+    ticking_down: bool,
+
+    duration: Duration,
+    last_tick: Instant
 
 }
 
@@ -38,7 +41,7 @@ enum Messages {
     MinuteInput,
     SecondInput,
 
-    Tick
+    Tick(Instant),
 }
 
 impl Application for Timer {
@@ -58,7 +61,9 @@ impl Application for Timer {
             minute_str_input: String::from(""),
             second_str_input: String::from(""),
             current_time: 0,
-            ticking_down: false
+            ticking_down: false,
+            last_tick: Instant::now(),
+            duration: Duration::from_secs(0)
         }, Command::none())
     }
 
@@ -69,7 +74,7 @@ impl Application for Timer {
     fn update(&mut self, message: Self::Message) -> Command<Messages> {
         match message {
             Messages::ChangePage(page) => {
-                self.current_page = page
+                self.current_page = page;
                 match self.current_page {
                     Pages::TimerLive => self.ticking_down = true,
                     other => self.ticking_down = false
@@ -84,20 +89,24 @@ impl Application for Timer {
                 let hour: u8 = self.hour_str_input.parse().unwrap();
                 self.hour_input = hour;
                 self.current_time += (hour as u32 * 60) * 60;
+                self.duration = Duration::from_secs(self.current_time as u64)
             }
             Messages::MinuteInput => {
                 let minute: u16 = self.minute_str_input.parse().unwrap();
                 self.minute_input = minute;
                 self.current_time += minute as u32 * 60;
+                self.duration = Duration::from_secs(self.current_time as u64)
             }
             Messages::SecondInput => {
                 let second: u16 = self.second_str_input.parse().unwrap();
                 self.second_input = second;
                 self.current_time += second as u32;
+                self.duration = Duration::from_secs(self.current_time as u64)
             }
 
-            Messages::Tick => {
-                self.current_time -= 1
+            Messages::Tick(now) => {
+                    self.duration += now - self.last_tick;
+                    self.last_tick = now;
             }
         }
         Command::none()
@@ -105,9 +114,10 @@ impl Application for Timer {
 
     fn subscription(&self) -> iced::Subscription<Self::Message> {
         let tick = match self.ticking_down {
-            true => { time::every(Duration::from_millis(10)).map(Messages::Tick)}
-            false => {Subscription::none()}
-        }
+            true => time::every(Duration::from_millis(10)).map(Messages::Tick),
+            false => Subscription::none()
+        };
+        tick
     }
 
     fn view(&self) -> iced::Element<'_, Self::Message> {
