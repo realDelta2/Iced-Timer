@@ -107,6 +107,13 @@ impl Application for Timer {
             Messages::Tick(now) => {
                     self.duration += now - self.last_tick;
                     self.last_tick = now;
+
+                    if self.duration > Duration::from_secs(self.current_time as u64) {
+                        println!("{:?} {:?}", self.duration, Duration::from_secs(self.current_time as u64).as_secs());
+                        self.ticking_down = false
+                    }
+
+
             }
         }
         Command::none()
@@ -114,7 +121,7 @@ impl Application for Timer {
 
     fn subscription(&self) -> iced::Subscription<Self::Message> {
         let tick = match self.ticking_down {
-            true => time::every(Duration::from_millis(10)).map(Messages::Tick),
+            true => time::every(Duration::from_millis(100)).map(Messages::Tick),
             false => Subscription::none()
         };
         tick
@@ -147,7 +154,7 @@ impl Application for Timer {
             }
             Pages::TimerLive => {
 
-                let time_display = text(format!("time in seconds: {}", &self.current_time));
+                let time_display = text(format!("time in seconds: {:?}", &self.duration));
                 time_display.into()
 
 
