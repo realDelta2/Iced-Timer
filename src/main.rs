@@ -2,6 +2,7 @@ use iced::{Application, Settings, Theme, executor, Command, Subscription};
 use iced::widget::{text, Row, TextInput, Button, Column};
 use iced::time;
 
+use std::fmt::format;
 use std::time::{Duration, Instant};
 
 struct Timer {
@@ -104,16 +105,9 @@ impl Application for Timer {
                 self.duration = Duration::from_secs(self.current_time as u64)
             }
 
-            Messages::Tick(now) => {
-                    self.duration += now - self.last_tick;
-                    self.last_tick = now;
-
-                    if self.duration > Duration::from_secs(self.current_time as u64) {
-                        println!("{:?} {:?}", self.duration, Duration::from_secs(self.current_time as u64).as_secs());
-                        self.ticking_down = false
-                    }
-
-
+            Messages::Tick(_) => {
+                println!("count {}", self.current_time);
+                self.current_time -= 1;
             }
         }
         Command::none()
@@ -121,7 +115,7 @@ impl Application for Timer {
 
     fn subscription(&self) -> iced::Subscription<Self::Message> {
         let tick = match self.ticking_down {
-            true => time::every(Duration::from_millis(100)).map(Messages::Tick),
+            true => time::every(Duration::from_secs(1)).map(Messages::Tick),
             false => Subscription::none()
         };
         tick
@@ -144,17 +138,17 @@ impl Application for Timer {
             .on_input(|input| {Messages::SecondStrInput(input)})
             .on_submit(Messages::SecondInput);
 
-            let time_enter = Button::new("finalize time!").on_press(Messages::ChangePage(Pages::TimerLive));
-
+            let time_enter = Button::new("Finalize:").on_press(Messages::ChangePage(Pages::TimerLive));
+            let current_time = text(format!("{}", self.current_time));
             let input_row = Row::new().push(hour_selector).push(minute_selector).push(second_selector);
             
-            Column::new().push(input_row).push(time_enter).into()
+            Column::new().push(input_row).push(current_time).push(time_enter).into()
 
             
             }
             Pages::TimerLive => {
 
-                let time_display = text(format!("time in seconds: {:?}", &self.duration));
+                let time_display = text(format!("time in seconds: {}", &self.current_time));
                 time_display.into()
 
 
