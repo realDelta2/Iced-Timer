@@ -1,4 +1,4 @@
-use iced::{Application, Settings, Theme, executor, Command, Subscription};
+use iced::{Application, Settings, Theme, executor, Command, Subscription, Length};
 use iced::widget::{text, Row, TextInput, Button, Column};
 use iced::time;
 
@@ -7,19 +7,13 @@ use std::time::{Duration, Instant};
 
 struct Timer {
     current_page: Pages,
-    hour_input: u8,
-    minute_input: u16,
-    second_input: u16,
 
-    hour_str_input: String,
-    minute_str_input: String,
-    second_str_input: String,
+
+    time_input: u32,
+    time_str_input: String,
 
     current_time: u32,
     ticking_down: bool,
-
-    duration: Duration,
-    last_tick: Instant
 
 }
 
@@ -34,13 +28,8 @@ enum Pages {
 enum Messages {
     ChangePage(Pages),
 
-    HourStrInput(String),
-    MinuteStrInput(String),
-    SecondStrInput(String),
-
-    HourInput,
-    MinuteInput,
-    SecondInput,
+    TimeStrInput(String),
+    TimeInput,
 
     Tick(Instant),
 }
@@ -55,16 +44,10 @@ impl Application for Timer {
     fn new(_flags: ()) -> (Timer, Command<Messages>) {
         (Timer {
             current_page: Pages::TimerSelecting,
-            hour_input: 0,
-            minute_input: 0,
-            second_input: 0,
-            hour_str_input: String::from(""),
-            minute_str_input: String::from(""),
-            second_str_input: String::from(""),
+            time_str_input: String::from("0:0:0"),
+            time_input: 0,
             current_time: 0,
             ticking_down: false,
-            last_tick: Instant::now(),
-            duration: Duration::from_secs(0)
         }, Command::none())
     }
 
@@ -82,32 +65,30 @@ impl Application for Timer {
                 }
             }
 
-            Messages::HourStrInput(input) => {self.hour_str_input = input}
-            Messages::MinuteStrInput(input) => {self.minute_str_input = input}
-            Messages::SecondStrInput(input) => {self.second_str_input = input}
+            Messages::TimeStrInput(Str) => {
+                self.time_str_input = Str;
+            }
 
-            Messages::HourInput => {
-                let hour: u8 = self.hour_str_input.parse().unwrap();
-                self.hour_input = hour;
-                self.current_time += (hour as u32 * 60) * 60;
-                self.duration = Duration::from_secs(self.current_time as u64)
+            Messages::TimeInput => {
+                let time_string = &self.time_str_input;
+                let time_vec: Vec<&str> = time_string.split(':').collect();
+
+                println!("{:?}", time_vec);
+
+
             }
-            Messages::MinuteInput => {
-                let minute: u16 = self.minute_str_input.parse().unwrap();
-                self.minute_input = minute;
-                self.current_time += minute as u32 * 60;
-                self.duration = Duration::from_secs(self.current_time as u64)
-            }
-            Messages::SecondInput => {
-                let second: u16 = self.second_str_input.parse().unwrap();
-                self.second_input = second;
-                self.current_time += second as u32;
-                self.duration = Duration::from_secs(self.current_time as u64)
-            }
+
+
+
 
             Messages::Tick(_) => {
                 println!("count {}", self.current_time);
                 self.current_time -= 1;
+
+                if self.current_time == 0 {
+                    self.ticking_down = false;
+                    self.current_page = Pages::TimerFinished;
+                }
             }
         }
         Command::none()
@@ -124,25 +105,14 @@ impl Application for Timer {
     fn view(&self) -> iced::Element<'_, Self::Message> {
         match &self.current_page {
             Pages::TimerSelecting => {
-            let hour_selector = TextInput::new("0", &self.hour_str_input)
-            .on_input(|input| {Messages::HourStrInput(input)})
-            .on_submit(Messages::HourInput);
-
-
-            let minute_selector = TextInput::new("0", &self.minute_str_input)
-            .on_input(|input| {Messages::MinuteStrInput(input)})
-            .on_submit(Messages::MinuteInput);
-
-
-            let second_selector = TextInput::new("0", &self.second_str_input)
-            .on_input(|input| {Messages::SecondStrInput(input)})
-            .on_submit(Messages::SecondInput);
+            let time_selector = TextInput::new("0:0:0", &self.time_str_input)
+            .on_input(|input| {Messages::TimeStrInput(input)})
+            .on_submit(Messages::TimeInput).width(Length::Fill);
 
             let time_enter = Button::new("Finalize:").on_press(Messages::ChangePage(Pages::TimerLive));
             let current_time = text(format!("{}", self.current_time));
-            let input_row = Row::new().push(hour_selector).push(minute_selector).push(second_selector);
             
-            Column::new().push(input_row).push(current_time).push(time_enter).into()
+            Column::new().push(time_selector).push(current_time).push(time_enter).into()
 
             
             }
