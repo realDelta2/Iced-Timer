@@ -33,6 +33,7 @@ enum Messages {
     TimeInput,
 
     Tick(Instant),
+    GoBack
 }
 
 impl Application for Timer {
@@ -58,7 +59,12 @@ impl Application for Timer {
 
     fn update(&mut self, message: Self::Message) -> Command<Messages> {
         match message {
+            Messages::GoBack => {
+                self.current_page = Pages::from(Pages::TimerSelecting)
+            }
             Messages::ChangePage(page) => {
+
+                self.current_page = page;
 
                 let time_string = &self.time_str_input;
                 let time_vec: Vec<u32> = time_string.split(':').map(|section| {
@@ -66,16 +72,17 @@ impl Application for Timer {
                         Ok(data) => {data}
                         Err(_) => {
                             self.current_page = Pages::TimerError;
+                            self.ticking_down = false;
                             0
                         }
                     }
                 }).collect();
 
+
+
                 self.time_input = (time_vec[0] * 60 * 60) + (time_vec[1] * 60) + time_vec[2];
                 self.current_time = self.time_input;
 
-
-                self.current_page = page;
                 match self.current_page {
                     Pages::TimerLive => self.ticking_down = true,
                     other => self.ticking_down = false
@@ -88,7 +95,18 @@ impl Application for Timer {
 
             Messages::TimeInput => {
                 let time_string = &self.time_str_input;
-                let time_vec: Vec<u32> = time_string.split(':').map(|section| {section.parse().unwrap()}).collect();
+                let time_vec: Vec<u32> = time_string.split(':').map(|section| {
+                    match section.parse::<u32>() {
+                        Ok(data) => {data}
+                        Err(_) => {
+                            self.current_page = Pages::TimerError;
+                            self.ticking_down = false;
+                            0
+                        }
+                    }
+                }).collect();
+
+
 
                 self.time_input = (time_vec[0] * 60 * 60) + (time_vec[1] * 60) + time_vec[2];
                 self.current_time = self.time_input;
@@ -98,16 +116,19 @@ impl Application for Timer {
 
             Messages::Tick(_) => {
                 println!("count {}", self.current_time);
+
                 self.current_time -= 1;
 
                 if self.current_time == 0 {
                     self.ticking_down = false;
                     self.current_page = Pages::TimerFinished;
                 }
+
             }
         }
         Command::none()
     }
+
 
     fn subscription(&self) -> iced::Subscription<Self::Message> {
         let tick = match self.ticking_down {
@@ -140,7 +161,10 @@ impl Application for Timer {
 
             }
             Pages::TimerFinished => {text("timer finished").into()}
-            Pages::TimerError => {text("an error occured").into()}
+            Pages::TimerError => {
+                let go_back_button = Button::new("retry").on_press(Messages::GoBack);
+                go_back_button.into()
+            }
         }
     }
 }
