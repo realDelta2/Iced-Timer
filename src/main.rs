@@ -21,7 +21,8 @@ struct Timer {
 enum Pages {
     TimerSelecting,
     TimerFinished,
-    TimerLive
+    TimerLive,
+    TimerError
 }
 
 #[derive(Debug, Clone)]
@@ -63,7 +64,10 @@ impl Application for Timer {
                 let time_vec: Vec<u32> = time_string.split(':').map(|section| {
                     match section.parse::<u32>() {
                         Ok(data) => {data}
-                        Err(_) => {0}
+                        Err(_) => {
+                            self.current_page = Pages::TimerError;
+                            0
+                        }
                     }
                 }).collect();
 
@@ -136,6 +140,7 @@ impl Application for Timer {
 
             }
             Pages::TimerFinished => {text("timer finished").into()}
+            Pages::TimerError => {text("an error occured").into()}
         }
     }
 }
