@@ -60,7 +60,12 @@ impl Application for Timer {
             Messages::ChangePage(page) => {
 
                 let time_string = &self.time_str_input;
-                let time_vec: Vec<u32> = time_string.split(':').map(|section| {section.parse().unwrap()}).collect();
+                let time_vec: Vec<u32> = time_string.split(':').map(|section| {
+                    match section.parse::<u32>() {
+                        Ok(data) => {data}
+                        Err(_) => {0}
+                    }
+                }).collect();
 
                 self.time_input = (time_vec[0] * 60 * 60) + (time_vec[1] * 60) + time_vec[2];
                 self.current_time = self.time_input;
