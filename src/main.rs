@@ -1,5 +1,5 @@
 use iced::{Application, Settings, Theme, executor, Command, Subscription, Length};
-use iced::widget::{text, Row, TextInput, Button, Column};
+use iced::widget::{text, Row, TextInput, Button, Column, button};
 use iced::time;
 
 use std::fmt::format;
@@ -33,7 +33,8 @@ enum Messages {
     TimeInput,
 
     Tick(Instant),
-    GoBack
+    GoBack,
+    Restart
 }
 
 impl Application for Timer {
@@ -59,6 +60,9 @@ impl Application for Timer {
 
     fn update(&mut self, message: Self::Message) -> Command<Messages> {
         match message {
+            Messages::Restart => {
+                self.current_page = Pages::TimerSelecting
+            }
             Messages::GoBack => {
                 self.current_page = Pages::from(Pages::TimerSelecting)
             }
@@ -160,7 +164,10 @@ impl Application for Timer {
 
 
             }
-            Pages::TimerFinished => {text("timer finished").into()}
+            Pages::TimerFinished => {
+                let restart_button = Button::new("restart").on_press(Messages::Restart);
+                restart_button.into()
+            }
             Pages::TimerError => {
                 let go_back_button = Button::new("retry").on_press(Messages::GoBack);
                 go_back_button.into()
