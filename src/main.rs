@@ -2,16 +2,15 @@ use iced::{Application, Settings, Theme, executor, Command, Subscription, Length
 use iced::widget::{text, Row, TextInput, Button, Column, button};
 use iced::time;
 
+
 use std::time::{Duration, Instant};
 
 struct Timer {
     current_page: Pages,
 
-
     time_input: u32,
     time_str_input: String,
 
-    current_time: u32,
     duration: Duration,
     state: State
 
@@ -33,7 +32,6 @@ enum Messages {
     TimeInput,
 
     Tick(Instant),
-    Restart,
     
 }
 
@@ -54,7 +52,6 @@ impl Application for Timer {
             current_page: Pages::TimerSelecting,
             time_str_input: String::from("0:0:0"),
             time_input: 0,
-            current_time: 0,
             state: State::Idle,
             duration: Duration::default()
         }, Command::none())
@@ -66,35 +63,8 @@ impl Application for Timer {
 
     fn update(&mut self, message: Self::Message) -> Command<Messages> {
         match message {
-            Messages::Restart => {
-                self.current_page = Pages::TimerSelecting
-            }
-            
             Messages::ChangePage(page) => {
-
                 self.current_page = page;
-
-                let time_string = &self.time_str_input;
-                let time_vec: Vec<u32> = time_string.split(':').map(|section| {
-                    match section.parse::<u32>() {
-                        Ok(data) => {data}
-                        Err(_) => {
-                            self.current_page = Pages::TimerError;
-                            self.state = State::Idle;
-                            0
-                        }
-                    }
-                }).collect();
-
-
-
-                self.time_input = (time_vec[0] * 60 * 60) + (time_vec[1] * 60) + time_vec[2];
-                self.duration = Duration::from_secs(self.time_input as u64);
-
-                match self.current_page {
-                    Pages::TimerLive => self.state = State::Ticking { last_tick: Instant::now() },
-                    other => self.state = State::Idle
-                }
             }
 
             Messages::TimeStrInput(Str) => {
@@ -118,6 +88,9 @@ impl Application for Timer {
 
                 self.time_input = (time_vec[0] * 60 * 60) + (time_vec[1] * 60) + time_vec[2];
                 self.duration = Duration::from_secs(self.time_input as u64);
+
+                self.current_page = Pages::TimerLive;
+                self.state = State::Ticking { last_tick: Instant::now() }
             }
 
 
@@ -144,7 +117,7 @@ impl Application for Timer {
 
     fn subscription(&self) -> iced::Subscription<Self::Message> {
         let tick = match self.state {
-            State::Ticking { .. } => time::every(Duration::from_millis(10)).map(Messages::Tick),
+            State::Ticking { .. } => time::every(Duration::from_millis(100)).map(Messages::Tick),
             State::Idle => Subscription::none()
         };
         tick
@@ -154,10 +127,9 @@ impl Application for Timer {
         match &self.current_page {
             Pages::TimerSelecting => {
             let time_selector = TextInput::new("0:0:0", &self.time_str_input)
-            .on_input(|input| {Messages::TimeStrInput(input)})
-            .on_submit(Messages::TimeInput).width(Length::Fill);
+            .on_input(|input| {Messages::TimeStrInput(input)}).width(Length::Fill);
 
-            let time_enter = Button::new("Finalize:").on_press(Messages::ChangePage(Pages::TimerLive));
+            let time_enter = Button::new("Finalize:").on_press(Messages::TimeInput);
             let current_time = text(format!("{:?}", self.duration));
             
             Column::new().push(time_selector).push(current_time).push(time_enter).into()
@@ -166,18 +138,18 @@ impl Application for Timer {
             }
             Pages::TimerLive => {
 
-                let time_display = text(format!("time in seconds: {:?}", &self.duration));
+                let time_display = text(format!("time in seconds: {:?}", &self.duration.as_secs()));
                 time_display.into()
 
 
 
             }
             Pages::TimerFinished => {
-                let restart_button = Button::new("restart").on_press(Messages::Restart);
+                let restart_button = Button::new("restart").on_press(Messages::ChangePage(Pages::TimerSelecting));
                 restart_button.into()
             }
             Pages::TimerError => {
-                let go_back_button = Button::new("retry").on_press(Messages::Restart);
+                let go_back_button = Button::new("retry").on_press(Messages::ChangePage(Pages::TimerSelecting));
                 go_back_button.into()
             }
         }
