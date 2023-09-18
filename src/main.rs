@@ -7,13 +7,10 @@ use std::time::{Duration, Instant};
 
 struct Timer {
     current_page: Pages,
-
     time_input: u32,
     time_str_input: String,
-
     duration: Duration,
     state: State
-
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -27,12 +24,9 @@ enum Pages {
 #[derive(Debug, Clone)]
 enum Messages {
     ChangePage(Pages),
-
     TimeStrInput(String),
     TimeInput,
-
     Tick(Instant),
-    
 }
 
 enum State {
@@ -67,8 +61,8 @@ impl Application for Timer {
                 self.current_page = page;
             }
 
-            Messages::TimeStrInput(Str) => {
-                self.time_str_input = Str;
+            Messages::TimeStrInput(str) => {
+                self.time_str_input = str;
             }
 
             Messages::TimeInput => {
@@ -83,8 +77,6 @@ impl Application for Timer {
                         }
                     }
                 }).collect();
-
-
 
                 self.time_input = (time_vec[0] * 60 * 60) + (time_vec[1] * 60) + time_vec[2];
                 self.duration = Duration::from_secs(self.time_input as u64);
@@ -137,12 +129,8 @@ impl Application for Timer {
             
             }
             Pages::TimerLive => {
-
-                let time_display = text(format!("time in seconds: {:?}", &self.duration.as_secs()));
+                let time_display = text(format!("time in seconds: {:?}", &self.duration));
                 time_display.into()
-
-
-
             }
             Pages::TimerFinished => {
                 let restart_button = Button::new("restart").on_press(Messages::ChangePage(Pages::TimerSelecting));
