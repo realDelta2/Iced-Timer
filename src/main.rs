@@ -1,5 +1,5 @@
 use iced::{Application, Settings, Theme, executor, Command, Subscription, Length, theme};
-use iced::widget::{text, row, TextInput, Button, Column, Space, container, Row};
+use iced::widget::{text, row, TextInput, Button, Column, Space, container, column};
 use iced::time;
 
 
@@ -199,7 +199,15 @@ impl Application for Timer {
                 .on_input(|input| {
                     Messages::TimeDataInput(Entries::Seconds, input)
                 }).size(170);
-                let select_row = row![Space::with_width(10), hour_select,Space::with_width(10), minute_select, Space::with_width(10), second_select, Space::with_width(10)];
+
+                let select_row = row![
+                    Space::with_width(10),
+                    hour_select,
+                    Space::with_width(10),
+                    minute_select,
+                    Space::with_width(10), 
+                    second_select, Space::with_width(10)
+                ];
                 
                 
                 let clear_time = Button::new("Reset Time")
@@ -207,10 +215,9 @@ impl Application for Timer {
                 let start_timer = Button::new("Start Timer!")
                 .on_press(Messages::TimeInput);
 
-                let button_row = Row::new().push(start_timer).push(clear_time).spacing(20).align_items(iced::Alignment::Center);
-
-                let column = Column::new().push(Space::with_height(40)).push(select_row).push(Space::with_height(40)).push(container(button_row).center_x().width(Length::Fill));
-
+                let button_row = row![start_timer, clear_time].spacing(20).align_items(iced::Alignment::Center);
+                let button_row_container = container(button_row).center_x().width(Length::Fill);
+                let column = column![Space::with_height(40), select_row, Space::with_height(40), button_row_container];
 
                 column.into()
             
