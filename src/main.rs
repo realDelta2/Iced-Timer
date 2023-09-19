@@ -1,14 +1,14 @@
-use iced::{Application, Settings, Theme, executor, Command, Subscription, Length, Element};
-use iced::widget::{text, Row, TextInput, Button, Column, button, Container};
+use iced::{Application, Settings, Theme, executor, Command, Subscription, Length, theme};
+use iced::widget::{text, row, TextInput, Button, Column, Space, container, Row};
 use iced::time;
 
 
 use std::time::{Duration, Instant};
 
 struct InputData {
-    hour_input: u16,
-    minute_input: u16,
-    second_input: u16,
+    hour_input: u8,
+    minute_input: u8,
+    second_input: u8,
     hour_str_input: String,
     minute_str_input: String,
     second_str_input: String,
@@ -43,7 +43,8 @@ enum Messages {
     TimeDataInput(Entries, String),
     TimeInput,
     Tick(Instant),
-    Void
+    Void,
+    ClearTime
 }
 
 enum State {
@@ -81,6 +82,14 @@ impl Application for Timer {
 
     fn update(&mut self, message: Self::Message) -> Command<Messages> {
         match message {
+            Messages::ClearTime => {
+                self.input_data.hour_input = 0;
+                self.input_data.hour_str_input = String::from("");
+                self.input_data.minute_input = 0;
+                self.input_data.minute_str_input = String::from("");
+                self.input_data.second_input = 0;
+                self.input_data.second_str_input = String::from("");
+            }
             Messages::Void => {}
             Messages::ChangePage(page) => {
                 self.current_page = page;
@@ -89,7 +98,7 @@ impl Application for Timer {
             Messages::TimeDataInput(entry, value) => {
                 match entry {
                     Entries::Hours => {
-                        let value_as_number = value.parse::<u16>();
+                        let value_as_number = value.parse::<u8>();
                         if value.is_empty() {
                             self.input_data.hour_str_input = value;
                             self.input_data.hour_input = 0;
@@ -99,7 +108,7 @@ impl Application for Timer {
                         }
                     }
                     Entries::Minutes => {
-                        let value_as_number = value.parse::<u16>();
+                        let value_as_number = value.parse::<u8>();
                         if value.is_empty() {
                             self.input_data.minute_str_input = value;
                             self.input_data.minute_input = 0;
@@ -109,7 +118,7 @@ impl Application for Timer {
                         }
                     }
                     Entries::Seconds => {
-                        let value_as_number = value.parse::<u16>();
+                        let value_as_number = value.parse::<u8>();
                         if value.is_empty() {
                             self.input_data.second_str_input = value;
                             self.input_data.second_input = 0;
@@ -181,23 +190,26 @@ impl Application for Timer {
                 let hour_select = TextInput::new("0", &self.input_data.hour_str_input)
                 .on_input(|input| {
                     Messages::TimeDataInput(Entries::Hours, input)
-                }).size(200);
-
-
+                }).size(170);
                 let minute_select = TextInput::new("0", &self.input_data.minute_str_input)
                 .on_input(|input| {
                     Messages::TimeDataInput(Entries::Minutes, input)
-                }).size(200);
-
+                }).size(170);
                 let second_select = TextInput::new("0", &self.input_data.second_str_input)
                 .on_input(|input| {
                     Messages::TimeDataInput(Entries::Seconds, input)
-                }).size(200);
-
-                let select_row = Row::new().push(hour_select).push(minute_select).push(second_select);
+                }).size(170);
+                let select_row = row![Space::with_width(10), hour_select,Space::with_width(10), minute_select, Space::with_width(10), second_select, Space::with_width(10)];
+                
+                
+                let clear_time = Button::new("Reset Time")
+                .on_press(Messages::ClearTime).style(theme::Button::Destructive);
                 let start_timer = Button::new("Start Timer!")
                 .on_press(Messages::TimeInput);
-                let column = Column::new().push(select_row).push(start_timer);
+
+                let button_row = Row::new().push(start_timer).push(clear_time).spacing(20).align_items(iced::Alignment::Center);
+
+                let column = Column::new().push(Space::with_height(40)).push(select_row).push(Space::with_height(40)).push(container(button_row).center_x().width(Length::Fill));
 
 
                 column.into()
