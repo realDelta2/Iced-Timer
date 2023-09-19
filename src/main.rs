@@ -47,7 +47,8 @@ enum Messages {
     Void,
     ClearTime,
     ResetTimer,
-    Cancel
+    Cancel,
+    Toggle
 }
 
 enum State {
@@ -86,6 +87,16 @@ impl Application for Timer {
 
     fn update(&mut self, message: Self::Message) -> Command<Messages> {
         match message {
+            Messages::Toggle => match self.state {
+                State::Idle => {
+                    self.state = State::Ticking {
+                        last_tick: Instant::now(),
+                    };
+                }
+                State::Ticking { .. } => {
+                    self.state = State::Idle;
+                }
+            }
             Messages::Cancel => {
                 self.state = State::Idle;
                 self.duration = self.total_duration;
@@ -224,7 +235,7 @@ impl Application for Timer {
                 ];
                 
                 
-                let clear_time = Button::new("Clear Time")
+                let clear_time = Button::new("Clear Timer")
                 .on_press(Messages::ClearTime).style(theme::Button::Destructive);
                 let start_timer = Button::new("Start Timer!")
                 .on_press(Messages::TimeInput);
@@ -252,11 +263,22 @@ impl Application for Timer {
 
                 let display_container = container(display).center_x().width(Length::Fill).center_y().align_y(alignment::Vertical::Center);
 
-                let reset_timer = Button::new("Reset Timer!").on_press(Messages::ResetTimer);
-                let pause = Button::new("Pause");
-                let cancel_timer = Button::new("Cancel").on_press(Messages::Cancel);
+                let reset_timer = Button::new("Reset Timer!").on_press(Messages::ResetTimer)
+                .style(theme::Button::Destructive);
+                
+                let pause = {
+                    let label = match self.state {
+                        State::Idle => "unpause",
+                        State::Ticking { .. } => "pause"
+                    };
 
-                let button_row = row![reset_timer, cancel_timer].spacing(20).align_items(Alignment::Center);
+                    Button::new(label).on_press(Messages::Toggle)
+                };
+
+                let cancel_timer = Button::new("Cancel").on_press(Messages::Cancel)
+                .style(theme::Button::Destructive);
+
+                let button_row = row![reset_timer, pause, cancel_timer].spacing(20).align_items(Alignment::Center);
                 let button_row_container = container(button_row).center_x().width(Length::Fill);
 
                 let column = column![Space::with_height(40), display_container, Space::with_height(40), button_row_container];
