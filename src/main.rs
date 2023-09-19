@@ -206,7 +206,7 @@ impl Application for Timer {
             Pages::TimerLive => {
                 let total_seconds = self.duration.as_secs_f64().round();
                 let hours = (total_seconds / 3600.0).floor();
-                let minutes = ((total_seconds.rem_euclid(3600.0)) / 60.0).ceil();
+                let minutes = ((total_seconds.rem_euclid(3600.0)) / 60.0).floor();
                 let seconds =  (total_seconds.rem_euclid(3600.0)).rem_euclid(60.0);
                 let time_display = text(format!("h:{} m:{} s: {}", hours, minutes, seconds));
                 time_display.into()
