@@ -1,4 +1,4 @@
-use iced::{Application, Settings, Theme, executor, Command, Subscription, Length, theme};
+use iced::{Application, Settings, Theme, executor, Command, Subscription, Length, theme, alignment, Alignment};
 use iced::widget::{text, row, TextInput, Button, Column, Space, container, column};
 use iced::time;
 
@@ -20,6 +20,7 @@ struct Timer {
     input_data: InputData,
     duration: Duration,
     state: State,
+    total_duration: Duration
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -44,7 +45,9 @@ enum Messages {
     TimeInput,
     Tick(Instant),
     Void,
-    ClearTime
+    ClearTime,
+    ResetTimer,
+    Cancel
 }
 
 enum State {
@@ -72,6 +75,7 @@ impl Application for Timer {
                 second_str_input: String::from(""),
          },
             state: State::Idle,
+            total_duration: Duration::default(),
             duration: Duration::default(),
         }, Command::none())
     }
@@ -82,6 +86,14 @@ impl Application for Timer {
 
     fn update(&mut self, message: Self::Message) -> Command<Messages> {
         match message {
+            Messages::Cancel => {
+                self.state = State::Idle;
+                self.duration = self.total_duration;
+                self.current_page = Pages::TimerSelecting;
+            }
+            Messages::ResetTimer => {
+                self.duration = self.total_duration;
+            }
             Messages::ClearTime => {
                 self.input_data.hour_input = 0;
                 self.input_data.hour_str_input = String::from("");
@@ -147,6 +159,7 @@ impl Application for Timer {
 
                 self.input_data.total_input = (time_vec[0] * 60 * 60) + (time_vec[1] * 60) + time_vec[2];
                 self.duration = Duration::from_secs(self.input_data.total_input as u64);
+                self.total_duration = self.duration;
                 if !error_occured {
                     self.current_page = Pages::TimerLive;
                     self.state = State::Ticking { last_tick: Instant::now() }
@@ -206,11 +219,12 @@ impl Application for Timer {
                     Space::with_width(10),
                     minute_select,
                     Space::with_width(10), 
-                    second_select, Space::with_width(10)
+                    second_select, 
+                    Space::with_width(10)
                 ];
                 
                 
-                let clear_time = Button::new("Reset Time")
+                let clear_time = Button::new("Clear Time")
                 .on_press(Messages::ClearTime).style(theme::Button::Destructive);
                 let start_timer = Button::new("Start Timer!")
                 .on_press(Messages::TimeInput);
@@ -227,8 +241,27 @@ impl Application for Timer {
                 let hours = (total_seconds / 3600.0).floor();
                 let minutes = ((total_seconds.rem_euclid(3600.0)) / 60.0).floor();
                 let seconds =  (total_seconds.rem_euclid(3600.0)).rem_euclid(60.0);
-                let time_display = text(format!("h:{} m:{} s: {}", hours, minutes, seconds));
-                time_display.into()
+            
+
+                let display = text(format!(
+                    "{:0>2}:{:0>2}:{:0>2}",
+                    hours, minutes, seconds
+                    
+                ))
+                .size(170);
+
+                let display_container = container(display).center_x().width(Length::Fill).center_y().align_y(alignment::Vertical::Center);
+
+                let reset_timer = Button::new("Reset Timer!").on_press(Messages::ResetTimer);
+                let pause = Button::new("Pause");
+                let cancel_timer = Button::new("Cancel").on_press(Messages::Cancel);
+
+                let button_row = row![reset_timer, cancel_timer].spacing(20).align_items(Alignment::Center);
+                let button_row_container = container(button_row).center_x().width(Length::Fill);
+
+                let column = column![Space::with_height(40), display_container, Space::with_height(40), button_row_container];
+
+                column.into()
             }
             Pages::TimerFinished => {
                 let restart_button = Button::new("restart").on_press(Messages::ChangePage(Pages::TimerSelecting));
