@@ -1,9 +1,8 @@
 use iced::{Application, Settings, Theme, executor, Command, Subscription, Length, theme, alignment, Alignment};
-use iced::widget::{text, row, TextInput, Button, Column, Space, container, column};
+use iced::widget::{text, row, TextInput, Button, Space, container, column};
 use iced::time;
 
 
-use std::fmt::Display;
 use std::time::{Duration, Instant};
 
 struct InputData {
@@ -45,7 +44,6 @@ enum Messages {
     TimeDataInput(Entries, String),
     TimeInput,
     Tick(Instant),
-    Void,
     ClearTime,
     ResetTimer,
     Cancel,
@@ -114,7 +112,7 @@ impl Application for Timer {
                 self.input_data.second_input = 0;
                 self.input_data.second_str_input = String::from("");
             }
-            Messages::Void => {}
+            
             Messages::ChangePage(page) => {
                 self.current_page = page;
             }
