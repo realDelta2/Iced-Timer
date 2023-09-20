@@ -83,7 +83,7 @@ impl Application for Timer {
     }
 
     fn title(&self) -> String {
-        String::from("boiler plate")
+        String::from("Timer")
     }
 
     fn update(&mut self, message: Self::Message) -> Command<Messages> {
@@ -296,7 +296,7 @@ impl Application for Timer {
 
                 let display_container = container(display).center_x().width(Length::Fill).center_y().align_y(alignment::Vertical::Center);
                 let reset_timer = Button::new("Reset Timer")
-                .on_press(Messages::Cancel);
+                .on_press(Messages::Cancel).style(theme::Button::Destructive);
 
                 let button_container = container(reset_timer)
                 .center_x().width(Length::Fill);
