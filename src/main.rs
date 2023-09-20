@@ -3,6 +3,7 @@ use iced::widget::{text, row, TextInput, Button, Column, Space, container, colum
 use iced::time;
 
 
+use std::fmt::Display;
 use std::time::{Duration, Instant};
 
 struct InputData {
@@ -188,7 +189,7 @@ impl Application for Timer {
                         }
                         None => {
                             self.state = State::Idle;
-                            self.current_page = Pages::TimerFinished
+                            self.current_page = Pages::TimerFinished;
                         }
                     }
                 }
@@ -286,8 +287,26 @@ impl Application for Timer {
                 column.into()
             }
             Pages::TimerFinished => {
-                let restart_button = Button::new("restart").on_press(Messages::ChangePage(Pages::TimerSelecting));
-                restart_button.into()
+                let display = text(format!(
+                    "{:0>2}:{:0>2}:{:0>2}",
+                    0, 0, 0
+                    
+                ))
+                .size(170);
+
+                let display_container = container(display).center_x().width(Length::Fill).center_y().align_y(alignment::Vertical::Center);
+                let reset_timer = Button::new("Reset Timer")
+                .on_press(Messages::Cancel);
+
+                let button_container = container(reset_timer)
+                .center_x().width(Length::Fill);
+
+                let column = column![Space::with_height(40), display_container, Space::with_height(40), button_container];
+
+                column.into()
+
+
+
             }
             Pages::TimerError => {
                 let go_back_button = Button::new("retry").on_press(Messages::ChangePage(Pages::TimerSelecting));
